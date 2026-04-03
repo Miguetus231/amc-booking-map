@@ -1064,7 +1064,7 @@
 <script>
 const SUPABASE_URL = "https://qrqdtzufqrucbhwvyutl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_9FzyiVtlKRKzTYOtXU2OLQ_jKv7a0ka";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let venues = [];
 let filteredVenues = [];
@@ -1131,7 +1131,7 @@ function createMarkerIcon(v, active) {
 }
 
 async function loadVenuesFromSupabase() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('venues')
     .select('*')
     .order('id', { ascending: true });
