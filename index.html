@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>CIRCUIT MAP — Venues & Promotores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #080810;
+    --bg2: #0e0e1a;
+    --bg3: #13131f;
+    --bg4: #1a1a2e;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text: #e2e2f0;
+    --text-dim: #8888a8;
+    --text-dimmer: #55556a;
+    --amc: #9333ea;
+    --amc-light: #c084fc;
+    --amc-bg: rgba(147,51,234,0.12);
+    --qotsa: #dc2626;
+    --qotsa-light: #f87171;
+    --qotsa-bg: rgba(220,38,38,0.12);
+    --gd: #16a34a;
+    --gd-light: #4ade80;
+    --gd-bg: rgba(22,163,74,0.12);
+    --gold: #f59e0b;
+    --sidebar-w: 300px;
+    --detail-w: 320px;
+    --header-h: 56px;
+    --stats-h: 40px;
+    --mobile-nav-h: 52px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .header-brand h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    letter-spacing: 3px;
+    color: var(--text);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .header-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--amc);
+    box-shadow: 0 0 10px var(--amc);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform: scale(1); }
+    50% { opacity:.5; transform: scale(.8); }
+  }
+
+  /* ── STATS BAR ───────────────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    gap: 0;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    height: var(--stats-h);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .stats-bar::-webkit-scrollbar { display: none; }
+
+  .stat-chip {
+    padding: 0 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .stat-chip .num {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-chip .lbl {
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .stat-chip.amc .num { color: var(--amc-light); }
+  .stat-chip.qotsa .num { color: var(--qotsa-light); }
+  .stat-chip.gd .num { color: var(--gd-light); }
+  .stat-chip.total .num { color: var(--gold); }
+
+  /* ── MAIN LAYOUT ─────────────────────────────────────── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .sidebar-top {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-box { position: relative; }
+
+  .search-box input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 8px 12px 8px 32px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+
+  .search-box input:focus { border-color: var(--amc); }
+
+  .search-icon {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dimmer);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 80px;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .filter-select:focus { border-color: var(--amc); }
+
+  .clear-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    transition: all .2s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .clear-btn:hover, .clear-btn:active { border-color: var(--text-dim); color: var(--text); }
+
+  .venue-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0 2px;
+  }
+
+  .venue-count strong { color: var(--gold); font-size: 12px; }
+
+  .category-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-tabs::-webkit-scrollbar { display: none; }
+
+  .cat-tab {
+    flex: 1;
+    min-width: 60px;
+    padding: 8px 4px;
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .5px;
+    text-align: center;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    border-right: 1px solid var(--border);
+    transition: all .2s;
+    text-transform: uppercase;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cat-tab:last-child { border-right: none; }
+  .cat-tab:hover { color: var(--text); background: var(--bg4); }
+  .cat-tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: var(--bg4); }
+
+  /* ── VENUE LIST ──────────────────────────────────────── */
+  .venue-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .venue-list::-webkit-scrollbar { width: 4px; }
+  .venue-list::-webkit-scrollbar-track { background: transparent; }
+  .venue-list::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .venue-item {
+    background: var(--bg3);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .venue-item:active { background: var(--bg4); }
+  .venue-item:hover { border-color: var(--border-bright); background: var(--bg4); }
+  .venue-item.active { border-color: var(--amc); background: rgba(147,51,234,0.08); }
+
+  .venue-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .venue-item-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  .venue-item-city {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .venue-item-shows { display: flex; gap: 3px; }
+
+  .show-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .show-dot.amc { background: var(--amc); box-shadow: 0 0 4px var(--amc); }
+  .show-dot.qotsa { background: var(--qotsa); box-shadow: 0 0 4px var(--qotsa); }
+  .show-dot.gd { background: var(--gd); box-shadow: 0 0 4px var(--gd); }
+
+  .diff-mini { display: flex; gap: 2px; }
+
+  .diff-mini-block {
+    width: 8px; height: 3px;
+    border-radius: 1px;
+    background: var(--border-bright);
+  }
+
+  .diff-mini-block.filled { background: var(--gold); }
+
+  /* ── MAP ─────────────────────────────────────────────── */
+  .map-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+  }
+
+  .map-legend {
+    position: absolute;
+    bottom: 28px;
+    left: 14px;
+    z-index: 999;
+    background: rgba(8,8,16,0.92);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 10px 12px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .legend-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── DETAIL PANEL ────────────────────────────────────── */
+  .detail-panel {
+    width: var(--detail-w);
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+
+  .detail-panel.open { transform: translateX(0); }
+
+  .detail-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .detail-close {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 5px;
+    color: var(--text-dim);
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .detail-close:active { color: var(--text); }
+
+  .detail-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    padding-right: 36px;
+    margin-bottom: 4px;
+  }
+
+  .detail-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+  }
+
+  .detail-type {
+    display: inline-block;
+    margin-top: 8px;
+    background: var(--bg4);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--text-dim);
+  }
+
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .detail-body::-webkit-scrollbar { width: 4px; }
+  .detail-body::-webkit-scrollbar-track { background: transparent; }
+  .detail-body::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .detail-section { display: flex; flex-direction: column; gap: 7px; }
+
+  .detail-section-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+  }
+
+  .show-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .show-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+
+  .show-chip.amc { background: var(--amc-bg); color: var(--amc-light); border: 1px solid var(--amc); }
+  .show-chip.qotsa { background: var(--qotsa-bg); color: var(--qotsa-light); border: 1px solid var(--qotsa); }
+  .show-chip.gd { background: var(--gd-bg); color: var(--gd-light); border: 1px solid var(--gd); }
+
+  .diff-bar { display: flex; align-items: center; gap: 8px; }
+  .diff-blocks { display: flex; gap: 3px; }
+
+  .diff-block {
+    width: 26px; height: 8px;
+    border-radius: 2px;
+    background: var(--bg4);
+    border: 1px solid var(--border-bright);
+    transition: background .2s;
+  }
+
+  .diff-block.filled {
+    background: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 6px rgba(245,158,11,0.4);
+  }
+
+  .diff-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .affinity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+  }
+
+  .affinity-badge.Alta { background: rgba(22,163,74,0.15); color: #4ade80; border: 1px solid #16a34a; }
+  .affinity-badge.Media { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid #f59e0b; }
+  .affinity-badge.Baja { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid #dc2626; }
+
+  .detail-list { display: flex; flex-direction: column; gap: 5px; }
+
+  .detail-list-item {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text);
+    align-items: flex-start;
+  }
+
+  .detail-list-item::before { content: '▸'; color: var(--text-dimmer); flex-shrink: 0; margin-top: 1px; }
+  .detail-list-item.disadv::before { color: var(--qotsa); content: '▾'; }
+
+  .detail-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .detail-text.highlight { border-color: var(--amc); background: rgba(147,51,234,0.06); }
+
+  .tags-row { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .tag {
+    padding: 3px 8px;
+    background: var(--bg4);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: .3px;
+  }
+
+  /* ── LEAFLET overrides ───────────────────────────────── */
+  .leaflet-popup-content-wrapper {
+    background: rgba(10,10,20,0.97) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    backdrop-filter: blur(12px) !important;
+  }
+
+  .leaflet-popup-tip { background: rgba(10,10,20,0.97) !important; }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+    color: var(--text) !important;
+    font-family: 'DM Sans', sans-serif !important;
+  }
+
+  .leaflet-control-zoom {
+    border: 1px solid var(--border-bright) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+  }
+
+  .leaflet-control-zoom a {
+    background: var(--bg2) !important;
+    color: var(--text-dim) !important;
+    border-bottom-color: var(--border) !important;
+  }
+
+  .leaflet-control-zoom a:hover { background: var(--bg4) !important; color: var(--text) !important; }
+
+  .leaflet-control-attribution {
+    background: rgba(8,8,16,0.7) !important;
+    color: var(--text-dimmer) !important;
+    font-size: 9px !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  .leaflet-control-attribution a { color: var(--text-dimmer) !important; }
+
+  .popup-inner {
+    padding: 12px 14px;
+    min-width: 200px;
+    max-width: 250px;
+  }
+
+  .popup-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    margin-bottom: 2px;
+  }
+
+  .popup-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dimmer);
+    letter-spacing: .5px;
+    margin-bottom: 8px;
+  }
+
+  .popup-shows { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  .popup-show-chip {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+  }
+
+  .popup-show-chip.amc { background: var(--amc-bg); color: var(--amc-light); border: 1px solid var(--amc); }
+  .popup-show-chip.qotsa { background: var(--qotsa-bg); color: var(--qotsa-light); border: 1px solid var(--qotsa); }
+  .popup-show-chip.gd { background: var(--gd-bg); color: var(--gd-light); border: 1px solid var(--gd); }
+
+  .popup-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .popup-diff-blocks { display: flex; gap: 2px; }
+
+  .popup-diff-block {
+    width: 14px; height: 5px;
+    border-radius: 1px;
+    background: var(--bg4);
+  }
+
+  .popup-diff-block.filled { background: var(--gold); }
+
+  .popup-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 7px;
+    background: var(--amc-bg);
+    border: 1px solid var(--amc);
+    border-radius: 6px;
+    color: var(--amc-light);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .2s;
+    text-transform: uppercase;
+  }
+
+  .popup-btn:hover, .popup-btn:active { background: var(--amc); color: #fff; }
+
+  .no-results {
+    padding: 24px 12px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dimmer);
+    line-height: 1.8;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MOBILE RESPONSIVE
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 700px) {
+    :root {
+      --mobile-nav-h: 52px;
+    }
+
+    /* Smaller header */
+    header { padding: 0 12px; height: 48px; }
+    .header-brand h1 { font-size: 17px; letter-spacing: 2px; }
+    .header-subtitle { display: none; }
+
+    /* Stats bar horizontal scroll */
+    .stats-bar { height: 36px; }
+    .stat-chip { padding: 0 10px; }
+    .stat-chip .num { font-size: 13px; }
+    .stat-chip .lbl { font-size: 8px; }
+
+    /* Hide desktop sidebar */
+    .sidebar { display: none; }
+
+    /* Map takes full width */
+    .map-area { flex: 1; }
+
+    /* Desktop detail panel hidden on mobile */
+    .detail-panel { display: none !important; }
+
+    /* ── MOBILE NAV BAR ── */
+    .mobile-nav {
+      display: flex !important;
+      height: var(--mobile-nav-h);
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .mobile-nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-dimmer);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all .2s;
+      border: none;
+      background: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .mobile-nav-btn .icon { font-size: 18px; line-height: 1; }
+
+    .mobile-nav-btn.active {
+      color: var(--gold);
+    }
+
+    .mobile-nav-btn:not(:last-child) {
+      border-right: 1px solid var(--border);
+    }
+
+    /* ── MOBILE LIST PANEL ── */
+    .mobile-list-panel {
+      display: flex !important;
+      position: fixed;
+      top: calc(48px + 36px); /* header + stats */
+      left: 0; right: 0;
+      bottom: var(--mobile-nav-h);
+      background: var(--bg2);
+      z-index: 50;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateX(-100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    .mobile-list-panel.visible {
+      transform: translateX(0);
+    }
+
+    /* ── MOBILE DETAIL SHEET ── */
+    .mobile-detail-sheet {
+      display: flex !important;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 200;
+      flex-direction: column;
+      background: var(--bg2);
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+
+    .mobile-detail-sheet.open {
+      transform: translateY(0);
+    }
+
+    .mobile-detail-sheet .detail-header {
+      padding-top: 16px;
+    }
+
+    .mobile-detail-sheet .detail-close {
+      width: 32px; height: 32px;
+      font-size: 16px;
+    }
+  }
+
+  /* ── MOBILE-ONLY ELEMENTS (hidden on desktop) ── */
+  .mobile-nav { display: none; }
+  .mobile-list-panel { display: none; }
+  .mobile-detail-sheet { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════ -->
+<header>
+  <div class="header-brand">
+    <div class="header-dot"></div>
+    <h1>CIRCUIT MAP</h1>
+    <span class="header-subtitle">Venues & Promotores · Bogotá · Cajicá · Fusagasugá</span>
+  </div>
+</header>
+
+<!-- ═══ STATS BAR ════════════════════════════════════════ -->
+<div class="stats-bar">
+  <div class="stat-chip total">
+    <div>
+      <div class="num" id="stat-total">14</div>
+      <div class="lbl">Total</div>
+    </div>
+  </div>
+  <div class="stat-chip amc">
+    <div>
+      <div class="num" id="stat-amc">—</div>
+      <div class="lbl">AMC</div>
+    </div>
+  </div>
+  <div class="stat-chip qotsa">
+    <div>
+      <div class="num" id="stat-qotsa">—</div>
+      <div class="lbl">QOTSA</div>
+    </div>
+  </div>
+  <div class="stat-chip gd">
+    <div>
+      <div class="num" id="stat-gd">—</div>
+      <div class="lbl">Green Day</div>
+    </div>
+  </div>
+  <div class="stat-chip" style="margin-left:auto;">
+    <div>
+      <div class="num" id="stat-promo" style="color:var(--text-dim)">—</div>
+      <div class="lbl">Promotoras</div>
+    </div>
+  </div>
+  <div class="stat-chip">
+    <div>
+      <div class="num" id="stat-acces" style="color:#38bdf8">—</div>
+      <div class="lbl">Accesibles</div>
+    </div>
+  </div>
+  <div class="stat-chip">
+    <div>
+      <div class="num" id="stat-heavy" style="color:#f97316">—</div>
+      <div class="lbl">Pesados</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- DESKTOP SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search-input" placeholder="Buscar venue…" />
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="filter-show">
+          <option value="">Todos los shows</option>
+          <option value="AMC">AMC Original</option>
+          <option value="QOTSA">Tributo QOTSA</option>
+          <option value="GreenDay">Tributo Green Day</option>
+        </select>
+        <select class="filter-select" id="filter-city">
+          <option value="">Todas las ciudades</option>
+          <option value="Bogotá">Bogotá</option>
+          <option value="Cajicá">Cajicá</option>
+          <option value="Fusagasugá">Fusagasugá</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="filter-affinity">
+          <option value="">Toda afinidad</option>
+          <option value="Alta">Alta</option>
+          <option value="Media">Media</option>
+          <option value="Baja">Baja</option>
+        </select>
+        <select class="filter-select" id="filter-diff">
+          <option value="">Toda dificultad</option>
+          <option value="1">★ Muy fácil</option>
+          <option value="2">★★ Fácil</option>
+          <option value="3">★★★ Media</option>
+          <option value="4">★★★★ Difícil</option>
+          <option value="5">★★★★★ Muy difícil</option>
+        </select>
+        <button class="clear-btn" id="clear-filters">✕</button>
+      </div>
+      <div class="venue-count" id="venue-count">Mostrando <strong>14</strong> venues</div>
+    </div>
+    <div class="category-tabs" id="cat-tabs-desktop">
+      <div class="cat-tab active" data-cat="">Todos</div>
+      <div class="cat-tab" data-cat="accesible">Accesibles</div>
+      <div class="cat-tab" data-cat="intermedio">Intermedios</div>
+      <div class="cat-tab" data-cat="pesado">Pesados</div>
+    </div>
+    <div class="venue-list" id="venue-list"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-area">
+    <div id="map"></div>
+    <div class="map-legend">
+      <div class="legend-title">Leyenda</div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--amc);box-shadow:0 0 6px var(--amc)"></div>
+        AMC Original
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--qotsa);box-shadow:0 0 6px var(--qotsa)"></div>
+        Tributo QOTSA
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--gd);box-shadow:0 0 6px var(--gd)"></div>
+        Tributo Green Day
+      </div>
+      <div style="border-top:1px solid var(--border);margin:2px 0"></div>
+      <div class="legend-item">
+        <div style="display:flex;gap:2px">
+          <div style="width:8px;height:5px;border-radius:1px;background:var(--gold)"></div>
+          <div style="width:8px;height:5px;border-radius:1px;background:var(--bg4)"></div>
+          <div style="width:8px;height:5px;border-radius:1px;background:var(--bg4)"></div>
+        </div>
+        Dificultad (1–5)
+      </div>
+    </div>
+  </div>
+
+  <!-- DESKTOP DETAIL PANEL -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <button class="detail-close" id="detail-close">✕</button>
+      <div class="detail-name" id="detail-name">—</div>
+      <div class="detail-meta" id="detail-meta">—</div>
+      <div class="detail-type" id="detail-type">—</div>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE NAV BAR ════════════════════════════════════ -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-btn" id="mob-btn-map" onclick="showMobileTab('map')">
+    <span class="icon">🗺</span>
+    <span>Mapa</span>
+  </button>
+  <button class="mobile-nav-btn" id="mob-btn-list" onclick="showMobileTab('list')">
+    <span class="icon">≡</span>
+    <span>Lista</span>
+  </button>
+</div>
+
+<!-- ═══ MOBILE LIST PANEL ════════════════════════════════ -->
+<div class="mobile-list-panel" id="mobile-list-panel">
+  <div class="sidebar-top">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search-input-mobile" placeholder="Buscar venue…" />
+    </div>
+    <div class="filter-row">
+      <select class="filter-select" id="filter-show-mobile">
+        <option value="">Todos los shows</option>
+        <option value="AMC">AMC Original</option>
+        <option value="QOTSA">Tributo QOTSA</option>
+        <option value="GreenDay">Tributo Green Day</option>
+      </select>
+      <select class="filter-select" id="filter-city-mobile">
+        <option value="">Todas las ciudades</option>
+        <option value="Bogotá">Bogotá</option>
+        <option value="Cajicá">Cajicá</option>
+        <option value="Fusagasugá">Fusagasugá</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <select class="filter-select" id="filter-affinity-mobile">
+        <option value="">Toda afinidad</option>
+        <option value="Alta">Alta</option>
+        <option value="Media">Media</option>
+        <option value="Baja">Baja</option>
+      </select>
+      <select class="filter-select" id="filter-diff-mobile">
+        <option value="">Toda dificultad</option>
+        <option value="1">★ Muy fácil</option>
+        <option value="2">★★ Fácil</option>
+        <option value="3">★★★ Media</option>
+        <option value="4">★★★★ Difícil</option>
+        <option value="5">★★★★★ Muy difícil</option>
+      </select>
+      <button class="clear-btn" id="clear-filters-mobile">✕</button>
+    </div>
+    <div class="venue-count" id="venue-count-mobile">Mostrando <strong>14</strong> venues</div>
+  </div>
+  <div class="category-tabs" id="cat-tabs-mobile">
+    <div class="cat-tab active" data-cat="">Todos</div>
+    <div class="cat-tab" data-cat="accesible">Accesibles</div>
+    <div class="cat-tab" data-cat="intermedio">Intermedios</div>
+    <div class="cat-tab" data-cat="pesado">Pesados</div>
+  </div>
+  <div class="venue-list" id="venue-list-mobile"></div>
+</div>
+
+<!-- ═══ MOBILE DETAIL SHEET ══════════════════════════════ -->
+<div class="mobile-detail-sheet" id="mobile-detail-sheet">
+  <div class="detail-header" style="padding-top:20px;">
+    <button class="detail-close" id="mobile-detail-close">✕</button>
+    <div class="detail-name" id="mobile-detail-name">—</div>
+    <div class="detail-meta" id="mobile-detail-meta">—</div>
+    <div class="detail-type" id="mobile-detail-type">—</div>
+  </div>
+  <div class="detail-body" id="mobile-detail-body"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATASET
+// ═══════════════════════════════════════════════════
+const venues = [
+  { id:1, name:"Volcano Rock City", city:"Fusagasugá", zone:"Centro", address:"Fusagasugá", type:"Bar / Venue local", lat:4.3371, lng:-74.3638, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Buena opción para networking regional","Eventos frecuentes","Conexión con bandas locales"], disadvantages:["Menor peso digital","Prestigio limitado frente a Bogotá"], entryStrategy:"Entrar por fecha compartida o contacto directo con bandas/organizadores locales.", bandBenefit:"Permite abrir plaza en Fusagasugá y construir presencia regional.", strategicTags:["Networking","Escena local","Expansión regional"] },
+  { id:2, name:"Baracunátana Café Salsa y Rock", city:"Fusagasugá", zone:"Piedra Grande", address:"Piedra Grande, Fusagasugá", type:"Bar con música en vivo", lat:4.3305, lng:-74.3612, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Público propio de bar","Espacio útil para repertorio suave o bohemio"], disadvantages:["No ideal para show pesado","Menor perfil de escena rock dura"], entryStrategy:"Proponer un show más atmosférico, bohemio o adaptable.", bandBenefit:"Sirve para probar repertorio accesible fuera de Bogotá.", strategicTags:["Show suave","Prueba de repertorio","Público propio"] },
+  { id:3, name:"Abbot Rock Bar", city:"Bogotá", zone:"Chapinero", address:"Calle 65 #13-42", type:"Rock bar", lat:4.6489, lng:-74.0628, recommendedShows:["QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Trayectoria fuerte","Ubicación estratégica","Público rockero"], disadvantages:["Poco natural para AMC original"], entryStrategy:"Entrar con tributo fuerte y bien vendido, idealmente con cover.", bandBenefit:"Aporta legitimidad en el circuito rock bogotano.", strategicTags:["Tributo ideal","Chapinero","Prestigio"] },
+  { id:4, name:"RELEVENT", city:"Bogotá", zone:"Chapinero", address:"Cra. 9A #60-27", type:"Music hall / Hub musical / Promotor", lat:4.6481, lng:-74.0621, recommendedShows:["QOTSA"], difficulty:4, affinity:"Alta", advantages:["Conexión con circuito musical","Espacio estratégico de networking","Infraestructura y programación"], disadvantages:["Exige propuesta clara y competitiva"], entryStrategy:"Presentar brochure o propuesta profesional del tributo.", bandBenefit:"Puede abrir puertas a circuito, alianzas y nuevas fechas.", strategicTags:["Promotor","Hub musical","Puerta de circuito"] },
+  { id:5, name:"Ace of Spades Club", city:"Bogotá", zone:"Av. Boyacá", address:"Av. Boyacá #51-25", type:"Venue pesado", lat:4.6548, lng:-74.102, recommendedShows:["QOTSA"], difficulty:5, affinity:"Media", advantages:["Venue de alto prestigio","Escena pesada consolidada"], disadvantages:["Barrera de entrada alta","No sirve para experimentar"], entryStrategy:"Entrar solo con show muy armado y material sólido.", bandBenefit:"Da validación fuerte dentro del circuito rock/metal.", strategicTags:["Prestigio","Peso pesado","Escena dura"] },
+  { id:6, name:"Orleans House Chapinero", city:"Bogotá", zone:"Chapinero", address:"Transversal 3C #47-53", type:"Gastrobar con música en vivo", lat:4.6403, lng:-74.0652, recommendedShows:["AMC"], difficulty:3, affinity:"Media", advantages:["Buen ambiente social","Actividad digital sólida"], disadvantages:["No ideal para show pesado"], entryStrategy:"Entrar con AMC en formato elegante, bohemio o atmosférico.", bandBenefit:"Permite mostrar una faceta más fina y adaptable de la banda.", strategicTags:["AMC","Bohemio","Chapinero"] },
+  { id:7, name:"Tulpa Rock Bar", city:"Bogotá", zone:"La Candelaria", address:"Carrera 1 #12-27", type:"Bar cultural / Rock bar", lat:4.5963, lng:-74.0722, recommendedShows:["AMC"], difficulty:2, affinity:"Alta", advantages:["Open mic","Espacio receptivo a propuestas propias","Circulación y formación"], disadvantages:["Menor escala de audiencia"], entryStrategy:"Entrar primero por set corto o micrófono abierto.", bandBenefit:"Ideal para probar repertorio original y leer al público.", strategicTags:["AMC","Prueba","Micrófono abierto"] },
+  { id:8, name:"Stones Rock Bogotá", city:"Bogotá", zone:"Modelia", address:"Cra 80a #24c-32", type:"Venue / Marca multisede", lat:4.6711, lng:-74.1172, recommendedShows:["QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Público propio","Varias sedes","Cultura de tributos"], disadvantages:["Menos natural para AMC original"], entryStrategy:"Entrar con el tributo como show de cartel.", bandBenefit:"Permite networking y posible repetición en otras sedes.", strategicTags:["Tributo","Multisede","Networking"] },
+  { id:9, name:"Dakota Producciones", city:"Bogotá", zone:"Promotora", address:"Bogotá", type:"Promotora", lat:4.6483, lng:-74.078, recommendedShows:["QOTSA","GreenDay"], difficulty:4, affinity:"Media", advantages:["Estructura profesional","Acceso a eventos producidos"], disadvantages:["Alta competencia","No sirve entrar improvisando"], entryStrategy:"Enviar correo y brochure / EPK profesional.", bandBenefit:"Puede abrir acceso a venues y shows de mayor nivel.", strategicTags:["Promotora","Brochure","Profesional"] },
+  { id:10, name:"La Casa del Oso Bar", city:"Bogotá", zone:"Centro", address:"Calle 19 #4-20", type:"Bar / Espacio cultural", lat:4.6018, lng:-74.0739, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Cercanía a zona cultural y universitaria","Flexibilidad"], disadvantages:["Menor presencia digital"], entryStrategy:"Hacer scouting primero y luego proponer fecha.", bandBenefit:"Sirve para circulación y prueba de formato.", strategicTags:["AMC","Scouting","Centro"] },
+  { id:11, name:"Smoking Molly", city:"Bogotá", zone:"Centro internacional", address:"Calle 29 Bis #5-74", type:"Venue / Rock bar", lat:4.6176, lng:-74.0698, recommendedShows:["QOTSA","GreenDay","AMC"], difficulty:3, affinity:"Alta", advantages:["Venue versátil","Renombre","Compatible con varias rutas"], disadvantages:["AMC requiere una fecha bien curada"], entryStrategy:"Entrar primero con tributo, luego evaluar AMC original.", bandBenefit:"Combina línea comercial y artística en un mismo venue.", strategicTags:["Versátil","Prestigio","Mixto"] },
+  { id:12, name:"Ozzy Company", city:"Bogotá", zone:"Av. Boyacá", address:"Av. Boyacá #64F-15", type:"Venue / Rock experience", lat:4.6764, lng:-74.1044, recommendedShows:["QOTSA","GreenDay"], difficulty:4, affinity:"Alta", advantages:["Público propio fuerte","Marca consolidada","Buena interacción"], disadvantages:["Mucha competencia dentro del formato tributo"], entryStrategy:"Entrar con show potente, pesado y muy vendible.", bandBenefit:"Da visibilidad fuerte en circuito de tributos.", strategicTags:["Tributo","Público propio","Peso medio-alto"] },
+  { id:13, name:"Kings of Metal", city:"Bogotá", zone:"Promotora", address:"Bogotá", type:"Promotora", lat:4.646, lng:-74.08, recommendedShows:["QOTSA"], difficulty:3, affinity:"Media", advantages:["Afinidad con rock/metal","Eventos temáticos"], disadvantages:["Poco encaje con AMC original"], entryStrategy:"Presentar el tributo como acto listo para compartir cartel.", bandBenefit:"Abre puertas a circuitos temáticos más duros.", strategicTags:["Promotora","Metal","Tributo"] },
+  { id:14, name:"Oveja Negra", city:"Cajicá", zone:"Vía Tabio", address:"Km 2.5 vía Tabio-Cajicá", type:"Restaurante con música en vivo", lat:4.9319, lng:-74.0328, recommendedShows:["AMC","QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Prestigio","Público propio","Experiencia premium"], disadvantages:["No ideal para el lado más agresivo del tributo"], entryStrategy:"Entrar con propuesta cuidada, adaptable y elegante.", bandBenefit:"Permite conectar con un público de mejor experiencia de consumo.", strategicTags:["Premium","Adaptable","Público propio"] }
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let filteredVenues = [...venues];
+let selectedId = null;
+let categoryFilter = '';
+let markers = {};
+let isMobile = () => window.innerWidth <= 700;
+let currentMobileTab = 'map';
+
+// ═══════════════════════════════════════════════════
+// MAP INIT
+// ═══════════════════════════════════════════════════
+const map = L.map('map', {
+  center: [4.63, -74.09],
+  zoom: 11,
+  zoomControl: true,
+  tap: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function getShowClass(show) {
+  if (show === 'AMC') return 'amc';
+  if (show === 'QOTSA') return 'qotsa';
+  if (show === 'GreenDay') return 'gd';
+  return '';
+}
+
+function getDiffLabel(d) {
+  return ['','Muy fácil','Fácil','Media','Difícil','Muy difícil'][d] || '';
+}
+
+function showChipsHtml(shows) {
+  return shows.map(s => `<span class="show-chip ${getShowClass(s)}">${s}</span>`).join('');
+}
+
+function diffBlocksHtml(d) {
+  return Array.from({length:5},(_,i)=>
+    `<div class="diff-block${i < d ? ' filled' : ''}"></div>`
+  ).join('');
+}
+
+function getMarkerColor(v) {
+  if (v.recommendedShows.includes('AMC') && v.recommendedShows.length === 1) return 'var(--amc)';
+  if (v.recommendedShows.includes('QOTSA')) return 'var(--qotsa)';
+  if (v.recommendedShows.includes('GreenDay')) return 'var(--gd)';
+  return 'var(--amc)';
+}
+
+function createMarkerIcon(v, active) {
+  const color = getMarkerColor(v);
+  const size = active ? 16 : 12;
+  const glow = active ? `box-shadow:0 0 0 3px rgba(255,255,255,0.2),0 0 12px ${color};` : `box-shadow:0 0 6px ${color};`;
+  return L.divIcon({
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};${glow}border:2px solid rgba(255,255,255,${active?'.6':'.25'});transition:all .2s;"></div>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// DETAIL CONTENT
+// ═══════════════════════════════════════════════════
+function getDetailBodyHtml(v) {
+  return `
+    <div class="detail-section">
+      <div class="detail-section-title">Shows recomendados</div>
+      <div class="show-chips">${showChipsHtml(v.recommendedShows)}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Dificultad de entrada</div>
+      <div class="diff-bar">
+        <div class="diff-blocks">${diffBlocksHtml(v.difficulty)}</div>
+        <span class="diff-label">${v.difficulty}/5 · ${getDiffLabel(v.difficulty)}</span>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Afinidad</div>
+      <span class="affinity-badge ${v.affinity}">● ${v.affinity}</span>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Ventajas</div>
+      <div class="detail-list">
+        ${v.advantages.map(a => `<div class="detail-list-item">${a}</div>`).join('')}
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Desventajas</div>
+      <div class="detail-list">
+        ${v.disadvantages.map(d => `<div class="detail-list-item disadv">${d}</div>`).join('')}
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Cómo entrar</div>
+      <div class="detail-text highlight">${v.entryStrategy}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Beneficio para la banda</div>
+      <div class="detail-text">${v.bandBenefit}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Etiquetas estratégicas</div>
+      <div class="tags-row">${v.strategicTags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+    ${v.notes ? `<div class="detail-section"><div class="detail-section-title">Notas</div><div class="detail-text">${v.notes}</div></div>` : ''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// BUILD MARKERS
+// ═══════════════════════════════════════════════════
+function buildMarkers() {
+  venues.forEach(v => {
+    const marker = L.marker([v.lat, v.lng], { icon: createMarkerIcon(v, false) });
+
+    const popupEl = document.createElement('div');
+    popupEl.className = 'popup-inner';
+    popupEl.innerHTML = `
+      <div class="popup-name">${v.name}</div>
+      <div class="popup-meta">${v.city} · ${v.zone}</div>
+      <div class="popup-shows">
+        ${v.recommendedShows.map(s => `<span class="popup-show-chip ${getShowClass(s)}">${s}</span>`).join('')}
+      </div>
+      <div class="popup-row">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)">Dificultad</span>
+        <div class="popup-diff-blocks">
+          ${Array.from({length:5},(_,i)=>`<div class="popup-diff-block${i < v.difficulty ? ' filled' : ''}"></div>`).join('')}
+        </div>
+      </div>
+      <div class="popup-row">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)">Afinidad</span>
+        <span class="affinity-badge ${v.affinity}" style="font-size:9px;padding:2px 8px">${v.affinity}</span>
+      </div>
+      <button class="popup-btn" onclick="selectVenue(${v.id})">Ver detalle completo →</button>
+    `;
+
+    marker.bindPopup(L.popup({ closeButton: false, maxWidth: 280 }).setContent(popupEl));
+
+    marker.on('click', () => {
+      Object.entries(markers).forEach(([id, m]) => {
+        const venue = venues.find(x => x.id == id);
+        if (venue) m.setIcon(createMarkerIcon(venue, false));
+      });
+      marker.setIcon(createMarkerIcon(v, true));
+      highlightSidebarItem(v.id);
+    });
+
+    marker.addTo(map);
+    markers[v.id] = marker;
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// SELECT VENUE
+// ═══════════════════════════════════════════════════
+window.selectVenue = function(id) {
+  const v = venues.find(x => x.id === id);
+  if (!v) return;
+  selectedId = id;
+
+  // Map
+  map.flyTo([v.lat, v.lng], 14, { duration: 1 });
+  Object.entries(markers).forEach(([mid, m]) => {
+    const venue = venues.find(x => x.id == mid);
+    if (venue) m.setIcon(createMarkerIcon(venue, mid == id));
+  });
+  if (markers[id]) setTimeout(() => markers[id].openPopup(), 900);
+
+  highlightSidebarItem(id);
+
+  if (isMobile()) {
+    openMobileDetail(v);
+  } else {
+    openDetailPanel(v);
+  }
+};
+
+function highlightSidebarItem(id) {
+  document.querySelectorAll('.venue-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id == id);
+  });
+  const active = document.querySelector(`.venue-item[data-id="${id}"]`);
+  if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════════════
+// DESKTOP DETAIL PANEL
+// ═══════════════════════════════════════════════════
+function openDetailPanel(v) {
+  document.getElementById('detail-name').textContent = v.name;
+  document.getElementById('detail-meta').textContent = `${v.city} · ${v.zone} · ${v.address}`;
+  document.getElementById('detail-type').textContent = v.type;
+  document.getElementById('detail-body').innerHTML = getDetailBodyHtml(v);
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+document.getElementById('detail-close').addEventListener('click', () => {
+  document.getElementById('detail-panel').classList.remove('open');
+  selectedId = null;
+  document.querySelectorAll('.venue-item').forEach(el => el.classList.remove('active'));
+  Object.entries(markers).forEach(([id, m]) => {
+    const venue = venues.find(x => x.id == id);
+    if (venue) m.setIcon(createMarkerIcon(venue, false));
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// MOBILE DETAIL SHEET
+// ═══════════════════════════════════════════════════
+function openMobileDetail(v) {
+  document.getElementById('mobile-detail-name').textContent = v.name;
+  document.getElementById('mobile-detail-meta').textContent = `${v.city} · ${v.zone} · ${v.address}`;
+  document.getElementById('mobile-detail-type').textContent = v.type;
+  document.getElementById('mobile-detail-body').innerHTML = getDetailBodyHtml(v);
+  document.getElementById('mobile-detail-sheet').classList.add('open');
+}
+
+document.getElementById('mobile-detail-close').addEventListener('click', () => {
+  document.getElementById('mobile-detail-sheet').classList.remove('open');
+  selectedId = null;
+  document.querySelectorAll('.venue-item').forEach(el => el.classList.remove('active'));
+  Object.entries(markers).forEach(([id, m]) => {
+    const venue = venues.find(x => x.id == id);
+    if (venue) m.setIcon(createMarkerIcon(venue, false));
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// MOBILE TAB NAV
+// ═══════════════════════════════════════════════════
+window.showMobileTab = function(tab) {
+  currentMobileTab = tab;
+  const listPanel = document.getElementById('mobile-list-panel');
+  const mapBtn = document.getElementById('mob-btn-map');
+  const listBtn = document.getElementById('mob-btn-list');
+
+  if (tab === 'list') {
+    listPanel.classList.add('visible');
+    listBtn.classList.add('active');
+    mapBtn.classList.remove('active');
+  } else {
+    listPanel.classList.remove('visible');
+    mapBtn.classList.add('active');
+    listBtn.classList.remove('active');
+    // Refresh map size when switching back
+    setTimeout(() => map.invalidateSize(), 310);
+  }
+};
+
+// Set initial mobile tab state
+document.getElementById('mob-btn-map').classList.add('active');
+
+// ═══════════════════════════════════════════════════
+// RENDER LIST (both desktop + mobile)
+// ═══════════════════════════════════════════════════
+function renderList() {
+  const renderTo = (listId) => {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (filteredVenues.length === 0) {
+      list.innerHTML = `<div class="no-results">Sin resultados<br><span style="font-size:9px">Prueba limpiar los filtros</span></div>`;
+      return;
+    }
+
+    filteredVenues.forEach(v => {
+      const item = document.createElement('div');
+      item.className = 'venue-item' + (v.id === selectedId ? ' active' : '');
+      item.dataset.id = v.id;
+
+      const showDots = v.recommendedShows.map(s =>
+        `<div class="show-dot ${getShowClass(s)}"></div>`
+      ).join('');
+
+      const diffBlocks = Array.from({length:5},(_,i)=>
+        `<div class="diff-mini-block${i < v.difficulty ? ' filled' : ''}"></div>`
+      ).join('');
+
+      item.innerHTML = `
+        <div class="venue-item-top">
+          <div class="venue-item-name">${v.name}</div>
+          <div class="venue-item-city">${v.city.slice(0,3).toUpperCase()}</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venue-item-shows">${showDots}</div>
+          <div class="diff-mini">${diffBlocks}</div>
+        </div>
+      `;
+
+      item.addEventListener('click', () => {
+        if (isMobile()) {
+          selectVenue(v.id);
+          // Switch to map tab on mobile to show the location
+          showMobileTab('map');
+        } else {
+          selectVenue(v.id);
+        }
+      });
+      list.appendChild(item);
+    });
+  };
+
+  renderTo('venue-list');
+  renderTo('venue-list-mobile');
+}
+
+// ═══════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════
+function updateStats() {
+  const amc = venues.filter(v => v.recommendedShows.includes('AMC')).length;
+  const qotsa = venues.filter(v => v.recommendedShows.includes('QOTSA')).length;
+  const gd = venues.filter(v => v.recommendedShows.includes('GreenDay')).length;
+  const promo = venues.filter(v => v.type.toLowerCase().includes('promotora')).length;
+  const acces = venues.filter(v => v.difficulty <= 2).length;
+  const heavy = venues.filter(v => v.difficulty >= 4).length;
+
+  document.getElementById('stat-total').textContent = venues.length;
+  document.getElementById('stat-amc').textContent = amc;
+  document.getElementById('stat-qotsa').textContent = qotsa;
+  document.getElementById('stat-gd').textContent = gd;
+  document.getElementById('stat-promo').textContent = promo;
+  document.getElementById('stat-acces').textContent = acces;
+  document.getElementById('stat-heavy').textContent = heavy;
+}
+
+// ═══════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════
+function getFilterValues() {
+  if (isMobile()) {
+    return {
+      search: document.getElementById('search-input-mobile').value.toLowerCase(),
+      show: document.getElementById('filter-show-mobile').value,
+      city: document.getElementById('filter-city-mobile').value,
+      affinity: document.getElementById('filter-affinity-mobile').value,
+      diff: document.getElementById('filter-diff-mobile').value,
+    };
+  } else {
+    return {
+      search: document.getElementById('search-input').value.toLowerCase(),
+      show: document.getElementById('filter-show').value,
+      city: document.getElementById('filter-city').value,
+      affinity: document.getElementById('filter-affinity').value,
+      diff: document.getElementById('filter-diff').value,
+    };
+  }
+}
+
+function applyFilters() {
+  const { search, show, city, affinity, diff } = getFilterValues();
+
+  filteredVenues = venues.filter(v => {
+    if (search && !v.name.toLowerCase().includes(search) && !v.city.toLowerCase().includes(search)) return false;
+    if (show && !v.recommendedShows.includes(show)) return false;
+    if (city && v.city !== city) return false;
+    if (affinity && v.affinity !== affinity) return false;
+    if (diff && v.difficulty !== parseInt(diff)) return false;
+    if (categoryFilter === 'accesible' && v.difficulty > 2) return false;
+    if (categoryFilter === 'intermedio' && v.difficulty !== 3) return false;
+    if (categoryFilter === 'pesado' && v.difficulty < 4) return false;
+    return true;
+  });
+
+  const count = filteredVenues.length;
+  const countHtml = `Mostrando <strong>${count}</strong> venue${count !== 1 ? 's' : ''}`;
+  document.getElementById('venue-count').innerHTML = countHtml;
+  const mobileCount = document.getElementById('venue-count-mobile');
+  if (mobileCount) mobileCount.innerHTML = countHtml;
+
+  // Show/hide markers
+  Object.entries(markers).forEach(([id, m]) => {
+    const inFilter = filteredVenues.find(v => v.id == id);
+    if (inFilter) {
+      if (!map.hasLayer(m)) m.addTo(map);
+    } else {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    }
+  });
+
+  renderList();
+}
+
+// ═══════════════════════════════════════════════════
+// EVENTS — DESKTOP
+// ═══════════════════════════════════════════════════
+['search-input','filter-show','filter-city','filter-affinity','filter-diff'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', applyFilters);
+    el.addEventListener('change', applyFilters);
+  }
+});
+
+document.getElementById('clear-filters').addEventListener('click', () => {
+  ['search-input','filter-show','filter-city','filter-affinity','filter-diff'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  categoryFilter = '';
+  document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === ''));
+  applyFilters();
+});
+
+document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    categoryFilter = tab.dataset.cat;
+    document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    applyFilters();
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// EVENTS — MOBILE
+// ═══════════════════════════════════════════════════
+['search-input-mobile','filter-show-mobile','filter-city-mobile','filter-affinity-mobile','filter-diff-mobile'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', applyFilters);
+    el.addEventListener('change', applyFilters);
+  }
+});
+
+document.getElementById('clear-filters-mobile').addEventListener('click', () => {
+  ['search-input-mobile','filter-show-mobile','filter-city-mobile','filter-affinity-mobile','filter-diff-mobile'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  categoryFilter = '';
+  document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === ''));
+  applyFilters();
+});
+
+document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    categoryFilter = tab.dataset.cat;
+    document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    applyFilters();
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+buildMarkers();
+updateStats();
+applyFilters();
+</script>
+</body>
+</html>
