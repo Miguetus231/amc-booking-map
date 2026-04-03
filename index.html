@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #080810;
@@ -49,7 +50,6 @@
     flex-direction: column;
   }
 
-  /* ── HEADER ─────────────────────────────────────────── */
   header {
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
@@ -89,7 +89,8 @@
   }
 
   .header-dot {
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--amc);
     box-shadow: 0 0 10px var(--amc);
@@ -102,7 +103,6 @@
     50% { opacity:.5; transform: scale(.8); }
   }
 
-  /* ── STATS BAR ───────────────────────────────────────── */
   .stats-bar {
     display: flex;
     gap: 0;
@@ -114,6 +114,7 @@
     overflow-y: hidden;
     scrollbar-width: none;
   }
+
   .stats-bar::-webkit-scrollbar { display: none; }
 
   .stat-chip {
@@ -146,7 +147,6 @@
   .stat-chip.gd .num { color: var(--gd-light); }
   .stat-chip.total .num { color: var(--gold); }
 
-  /* ── MAIN LAYOUT ─────────────────────────────────────── */
   .main {
     display: flex;
     flex: 1;
@@ -154,7 +154,6 @@
     position: relative;
   }
 
-  /* ── SIDEBAR ─────────────────────────────────────────── */
   .sidebar {
     width: var(--sidebar-w);
     background: var(--bg2);
@@ -193,7 +192,8 @@
 
   .search-icon {
     position: absolute;
-    left: 10px; top: 50%;
+    left: 10px;
+    top: 50%;
     transform: translateY(-50%);
     color: var(--text-dimmer);
     font-size: 14px;
@@ -238,7 +238,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .clear-btn:hover, .clear-btn:active { border-color: var(--text-dim); color: var(--text); }
+  .clear-btn:hover,
+  .clear-btn:active {
+    border-color: var(--text-dim);
+    color: var(--text);
+  }
 
   .venue-count {
     font-family: 'Space Mono', monospace;
@@ -259,6 +263,7 @@
     overflow-x: auto;
     scrollbar-width: none;
   }
+
   .category-tabs::-webkit-scrollbar { display: none; }
 
   .cat-tab {
@@ -282,7 +287,6 @@
   .cat-tab:hover { color: var(--text); background: var(--bg4); }
   .cat-tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: var(--bg4); }
 
-  /* ── VENUE LIST ──────────────────────────────────────── */
   .venue-list {
     flex: 1;
     overflow-y: auto;
@@ -339,7 +343,8 @@
   .venue-item-shows { display: flex; gap: 3px; }
 
   .show-dot {
-    width: 6px; height: 6px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -351,14 +356,14 @@
   .diff-mini { display: flex; gap: 2px; }
 
   .diff-mini-block {
-    width: 8px; height: 3px;
+    width: 8px;
+    height: 3px;
     border-radius: 1px;
     background: var(--border-bright);
   }
 
   .diff-mini-block.filled { background: var(--gold); }
 
-  /* ── MAP ─────────────────────────────────────────────── */
   .map-area {
     flex: 1;
     position: relative;
@@ -403,12 +408,12 @@
   }
 
   .legend-dot {
-    width: 9px; height: 9px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     flex-shrink: 0;
   }
 
-  /* ── DETAIL PANEL ────────────────────────────────────── */
   .detail-panel {
     width: var(--detail-w);
     background: var(--bg2);
@@ -431,13 +436,17 @@
 
   .detail-close {
     position: absolute;
-    top: 10px; right: 10px;
+    top: 10px;
+    right: 10px;
     background: var(--bg3);
     border: 1px solid var(--border-bright);
     border-radius: 5px;
     color: var(--text-dim);
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 14px;
     transition: all .2s;
@@ -518,7 +527,8 @@
   .diff-blocks { display: flex; gap: 3px; }
 
   .diff-block {
-    width: 26px; height: 8px;
+    width: 26px;
+    height: 8px;
     border-radius: 2px;
     background: var(--bg4);
     border: 1px solid var(--border-bright);
@@ -591,7 +601,6 @@
     letter-spacing: .3px;
   }
 
-  /* ── LEAFLET overrides ───────────────────────────────── */
   .leaflet-popup-content-wrapper {
     background: rgba(10,10,20,0.97) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
@@ -676,7 +685,8 @@
   .popup-diff-blocks { display: flex; gap: 2px; }
 
   .popup-diff-block {
-    width: 14px; height: 5px;
+    width: 14px;
+    height: 5px;
     border-radius: 1px;
     background: var(--bg4);
   }
@@ -699,7 +709,11 @@
     text-transform: uppercase;
   }
 
-  .popup-btn:hover, .popup-btn:active { background: var(--amc); color: #fff; }
+  .popup-btn:hover,
+  .popup-btn:active {
+    background: var(--amc);
+    color: #fff;
+  }
 
   .no-results {
     padding: 24px 12px;
@@ -710,95 +724,87 @@
     line-height: 1.8;
   }
 
-  /* ══════════════════════════════════════════════════════
-     MOBILE RESPONSIVE
-  ══════════════════════════════════════════════════════ */
   @media (max-width: 700px) {
     :root {
       --mobile-nav-h: 52px;
     }
 
-    /* Smaller header */
     header { padding: 0 12px; height: 48px; }
     .header-brand h1 { font-size: 17px; letter-spacing: 2px; }
     .header-subtitle { display: none; }
 
-    /* Stats bar horizontal scroll */
     .stats-bar { height: 36px; }
     .stat-chip { padding: 0 10px; }
     .stat-chip .num { font-size: 13px; }
     .stat-chip .lbl { font-size: 8px; }
 
-    /* Hide desktop sidebar */
     .sidebar { display: none; }
 
-    /* Map takes full width */
-    .map-area { flex: 1; }
+    .map-area {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
 
-    /* Desktop detail panel hidden on mobile */
+    #map {
+      position: relative;
+      z-index: 1;
+    }
+
+    .map-legend {
+      z-index: 1200;
+    }
+
     .detail-panel { display: none !important; }
-	/* Agregado Chat */
-	.map-area {
-  position: relative;
-  z-index: 1;
-}
 
-#map {
-  position: relative;
-  z-index: 1;
-}
-
-.map-legend {
-  z-index: 1200;
-}
-
-    /* ── MOBILE NAV BAR ── */
     .mobile-nav {
-  display: flex !important;
-  height: var(--mobile-nav-h);
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-  z-index: 3000;
-}
+      display: flex !important;
+      height: var(--mobile-nav-h);
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 3000;
+    }
 
-.mobile-list-panel {
-  display: flex !important;
-  position: fixed;
-  top: calc(48px + 36px);
-  left: 0;
-  right: 0;
-  bottom: var(--mobile-nav-h);
-  background: var(--bg2);
-  z-index: 2500;
-  flex-direction: column;
-  overflow: hidden;
-  transform: translateX(-100%);
-  transition: transform .3s cubic-bezier(.4,0,.2,1);
-}
+    .mobile-nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-dimmer);
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all .2s;
+      border: none;
+      background: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
 
-.mobile-detail-sheet {
-  display: flex !important;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 4000;
-  flex-direction: column;
-  background: var(--bg2);
-  transform: translateY(100%);
-  transition: transform .35s cubic-bezier(.4,0,.2,1);
-}
-    /* ── MOBILE LIST PANEL ── */
+    .mobile-nav-btn .icon { font-size: 18px; line-height: 1; }
+
+    .mobile-nav-btn.active {
+      color: var(--gold);
+    }
+
+    .mobile-nav-btn:not(:last-child) {
+      border-right: 1px solid var(--border);
+    }
+
     .mobile-list-panel {
       display: flex !important;
       position: fixed;
-      top: calc(48px + 36px); /* header + stats */
-      left: 0; right: 0;
+      top: calc(48px + 36px);
+      left: 0;
+      right: 0;
       bottom: var(--mobile-nav-h);
       background: var(--bg2);
-      z-index: 50;
+      z-index: 2500;
       flex-direction: column;
       overflow: hidden;
       transform: translateX(-100%);
@@ -809,12 +815,14 @@
       transform: translateX(0);
     }
 
-    /* ── MOBILE DETAIL SHEET ── */
     .mobile-detail-sheet {
       display: flex !important;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 200;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 4000;
       flex-direction: column;
       background: var(--bg2);
       transform: translateY(100%);
@@ -830,12 +838,12 @@
     }
 
     .mobile-detail-sheet .detail-close {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       font-size: 16px;
     }
   }
 
-  /* ── MOBILE-ONLY ELEMENTS (hidden on desktop) ── */
   .mobile-nav { display: none; }
   .mobile-list-panel { display: none; }
   .mobile-detail-sheet { display: none; }
@@ -843,7 +851,6 @@
 </head>
 <body>
 
-<!-- ═══ HEADER ═══════════════════════════════════════════ -->
 <header>
   <div class="header-brand">
     <div class="header-dot"></div>
@@ -852,11 +859,10 @@
   </div>
 </header>
 
-<!-- ═══ STATS BAR ════════════════════════════════════════ -->
 <div class="stats-bar">
   <div class="stat-chip total">
     <div>
-      <div class="num" id="stat-total">14</div>
+      <div class="num" id="stat-total">0</div>
       <div class="lbl">Total</div>
     </div>
   </div>
@@ -898,10 +904,7 @@
   </div>
 </div>
 
-<!-- ═══ MAIN ══════════════════════════════════════════════ -->
 <div class="main">
-
-  <!-- DESKTOP SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-top">
       <div class="search-box">
@@ -939,7 +942,7 @@
         </select>
         <button class="clear-btn" id="clear-filters">✕</button>
       </div>
-      <div class="venue-count" id="venue-count">Mostrando <strong>14</strong> venues</div>
+      <div class="venue-count" id="venue-count">Mostrando <strong>0</strong> venues</div>
     </div>
     <div class="category-tabs" id="cat-tabs-desktop">
       <div class="cat-tab active" data-cat="">Todos</div>
@@ -950,7 +953,6 @@
     <div class="venue-list" id="venue-list"></div>
   </div>
 
-  <!-- MAP -->
   <div class="map-area">
     <div id="map"></div>
     <div class="map-legend">
@@ -979,7 +981,6 @@
     </div>
   </div>
 
-  <!-- DESKTOP DETAIL PANEL -->
   <div class="detail-panel" id="detail-panel">
     <div class="detail-header">
       <button class="detail-close" id="detail-close">✕</button>
@@ -991,7 +992,6 @@
   </div>
 </div>
 
-<!-- ═══ MOBILE NAV BAR ════════════════════════════════════ -->
 <div class="mobile-nav" id="mobile-nav">
   <button class="mobile-nav-btn" id="mob-btn-map" onclick="showMobileTab('map')">
     <span class="icon">🗺</span>
@@ -1003,7 +1003,6 @@
   </button>
 </div>
 
-<!-- ═══ MOBILE LIST PANEL ════════════════════════════════ -->
 <div class="mobile-list-panel" id="mobile-list-panel">
   <div class="sidebar-top">
     <div class="search-box">
@@ -1041,7 +1040,7 @@
       </select>
       <button class="clear-btn" id="clear-filters-mobile">✕</button>
     </div>
-    <div class="venue-count" id="venue-count-mobile">Mostrando <strong>14</strong> venues</div>
+    <div class="venue-count" id="venue-count-mobile">Mostrando <strong>0</strong> venues</div>
   </div>
   <div class="category-tabs" id="cat-tabs-mobile">
     <div class="cat-tab active" data-cat="">Todos</div>
@@ -1052,7 +1051,6 @@
   <div class="venue-list" id="venue-list-mobile"></div>
 </div>
 
-<!-- ═══ MOBILE DETAIL SHEET ══════════════════════════════ -->
 <div class="mobile-detail-sheet" id="mobile-detail-sheet">
   <div class="detail-header" style="padding-top:20px;">
     <button class="detail-close" id="mobile-detail-close">✕</button>
@@ -1064,39 +1062,18 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// DATASET
-// ═══════════════════════════════════════════════════
-const venues = [
-  { id:1, name:"Volcano Rock City", city:"Fusagasugá", zone:"Centro", address:"Fusagasugá", type:"Bar / Venue local", lat:4.3371, lng:-74.3638, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Buena opción para networking regional","Eventos frecuentes","Conexión con bandas locales"], disadvantages:["Menor peso digital","Prestigio limitado frente a Bogotá"], entryStrategy:"Entrar por fecha compartida o contacto directo con bandas/organizadores locales.", bandBenefit:"Permite abrir plaza en Fusagasugá y construir presencia regional.", strategicTags:["Networking","Escena local","Expansión regional"] },
-  { id:2, name:"Baracunátana Café Salsa y Rock", city:"Fusagasugá", zone:"Piedra Grande", address:"Piedra Grande, Fusagasugá", type:"Bar con música en vivo", lat:4.3305, lng:-74.3612, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Público propio de bar","Espacio útil para repertorio suave o bohemio"], disadvantages:["No ideal para show pesado","Menor perfil de escena rock dura"], entryStrategy:"Proponer un show más atmosférico, bohemio o adaptable.", bandBenefit:"Sirve para probar repertorio accesible fuera de Bogotá.", strategicTags:["Show suave","Prueba de repertorio","Público propio"] },
-  { id:3, name:"Abbot Rock Bar", city:"Bogotá", zone:"Chapinero", address:"Calle 65 #13-42", type:"Rock bar", lat:4.6489, lng:-74.0628, recommendedShows:["QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Trayectoria fuerte","Ubicación estratégica","Público rockero"], disadvantages:["Poco natural para AMC original"], entryStrategy:"Entrar con tributo fuerte y bien vendido, idealmente con cover.", bandBenefit:"Aporta legitimidad en el circuito rock bogotano.", strategicTags:["Tributo ideal","Chapinero","Prestigio"] },
-  { id:4, name:"RELEVENT", city:"Bogotá", zone:"Chapinero", address:"Cra. 9A #60-27", type:"Music hall / Hub musical / Promotor", lat:4.6481, lng:-74.0621, recommendedShows:["QOTSA"], difficulty:4, affinity:"Alta", advantages:["Conexión con circuito musical","Espacio estratégico de networking","Infraestructura y programación"], disadvantages:["Exige propuesta clara y competitiva"], entryStrategy:"Presentar brochure o propuesta profesional del tributo.", bandBenefit:"Puede abrir puertas a circuito, alianzas y nuevas fechas.", strategicTags:["Promotor","Hub musical","Puerta de circuito"] },
-  { id:5, name:"Ace of Spades Club", city:"Bogotá", zone:"Av. Boyacá", address:"Av. Boyacá #51-25", type:"Venue pesado", lat:4.6548, lng:-74.102, recommendedShows:["QOTSA"], difficulty:5, affinity:"Media", advantages:["Venue de alto prestigio","Escena pesada consolidada"], disadvantages:["Barrera de entrada alta","No sirve para experimentar"], entryStrategy:"Entrar solo con show muy armado y material sólido.", bandBenefit:"Da validación fuerte dentro del circuito rock/metal.", strategicTags:["Prestigio","Peso pesado","Escena dura"] },
-  { id:6, name:"Orleans House Chapinero", city:"Bogotá", zone:"Chapinero", address:"Transversal 3C #47-53", type:"Gastrobar con música en vivo", lat:4.6403, lng:-74.0652, recommendedShows:["AMC"], difficulty:3, affinity:"Media", advantages:["Buen ambiente social","Actividad digital sólida"], disadvantages:["No ideal para show pesado"], entryStrategy:"Entrar con AMC en formato elegante, bohemio o atmosférico.", bandBenefit:"Permite mostrar una faceta más fina y adaptable de la banda.", strategicTags:["AMC","Bohemio","Chapinero"] },
-  { id:7, name:"Tulpa Rock Bar", city:"Bogotá", zone:"La Candelaria", address:"Carrera 1 #12-27", type:"Bar cultural / Rock bar", lat:4.5963, lng:-74.0722, recommendedShows:["AMC"], difficulty:2, affinity:"Alta", advantages:["Open mic","Espacio receptivo a propuestas propias","Circulación y formación"], disadvantages:["Menor escala de audiencia"], entryStrategy:"Entrar primero por set corto o micrófono abierto.", bandBenefit:"Ideal para probar repertorio original y leer al público.", strategicTags:["AMC","Prueba","Micrófono abierto"] },
-  { id:8, name:"Stones Rock Bogotá", city:"Bogotá", zone:"Modelia", address:"Cra 80a #24c-32", type:"Venue / Marca multisede", lat:4.6711, lng:-74.1172, recommendedShows:["QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Público propio","Varias sedes","Cultura de tributos"], disadvantages:["Menos natural para AMC original"], entryStrategy:"Entrar con el tributo como show de cartel.", bandBenefit:"Permite networking y posible repetición en otras sedes.", strategicTags:["Tributo","Multisede","Networking"] },
-  { id:9, name:"Dakota Producciones", city:"Bogotá", zone:"Promotora", address:"Bogotá", type:"Promotora", lat:4.6483, lng:-74.078, recommendedShows:["QOTSA","GreenDay"], difficulty:4, affinity:"Media", advantages:["Estructura profesional","Acceso a eventos producidos"], disadvantages:["Alta competencia","No sirve entrar improvisando"], entryStrategy:"Enviar correo y brochure / EPK profesional.", bandBenefit:"Puede abrir acceso a venues y shows de mayor nivel.", strategicTags:["Promotora","Brochure","Profesional"] },
-  { id:10, name:"La Casa del Oso Bar", city:"Bogotá", zone:"Centro", address:"Calle 19 #4-20", type:"Bar / Espacio cultural", lat:4.6018, lng:-74.0739, recommendedShows:["AMC"], difficulty:2, affinity:"Media", advantages:["Cercanía a zona cultural y universitaria","Flexibilidad"], disadvantages:["Menor presencia digital"], entryStrategy:"Hacer scouting primero y luego proponer fecha.", bandBenefit:"Sirve para circulación y prueba de formato.", strategicTags:["AMC","Scouting","Centro"] },
-  { id:11, name:"Smoking Molly", city:"Bogotá", zone:"Centro internacional", address:"Calle 29 Bis #5-74", type:"Venue / Rock bar", lat:4.6176, lng:-74.0698, recommendedShows:["QOTSA","GreenDay","AMC"], difficulty:3, affinity:"Alta", advantages:["Venue versátil","Renombre","Compatible con varias rutas"], disadvantages:["AMC requiere una fecha bien curada"], entryStrategy:"Entrar primero con tributo, luego evaluar AMC original.", bandBenefit:"Combina línea comercial y artística en un mismo venue.", strategicTags:["Versátil","Prestigio","Mixto"] },
-  { id:12, name:"Ozzy Company", city:"Bogotá", zone:"Av. Boyacá", address:"Av. Boyacá #64F-15", type:"Venue / Rock experience", lat:4.6764, lng:-74.1044, recommendedShows:["QOTSA","GreenDay"], difficulty:4, affinity:"Alta", advantages:["Público propio fuerte","Marca consolidada","Buena interacción"], disadvantages:["Mucha competencia dentro del formato tributo"], entryStrategy:"Entrar con show potente, pesado y muy vendible.", bandBenefit:"Da visibilidad fuerte en circuito de tributos.", strategicTags:["Tributo","Público propio","Peso medio-alto"] },
-  { id:13, name:"Kings of Metal", city:"Bogotá", zone:"Promotora", address:"Bogotá", type:"Promotora", lat:4.646, lng:-74.08, recommendedShows:["QOTSA"], difficulty:3, affinity:"Media", advantages:["Afinidad con rock/metal","Eventos temáticos"], disadvantages:["Poco encaje con AMC original"], entryStrategy:"Presentar el tributo como acto listo para compartir cartel.", bandBenefit:"Abre puertas a circuitos temáticos más duros.", strategicTags:["Promotora","Metal","Tributo"] },
-  { id:14, name:"Oveja Negra", city:"Cajicá", zone:"Vía Tabio", address:"Km 2.5 vía Tabio-Cajicá", type:"Restaurante con música en vivo", lat:4.9319, lng:-74.0328, recommendedShows:["AMC","QOTSA","GreenDay"], difficulty:3, affinity:"Alta", advantages:["Prestigio","Público propio","Experiencia premium"], disadvantages:["No ideal para el lado más agresivo del tributo"], entryStrategy:"Entrar con propuesta cuidada, adaptable y elegante.", bandBenefit:"Permite conectar con un público de mejor experiencia de consumo.", strategicTags:["Premium","Adaptable","Público propio"] }
-];
+const SUPABASE_URL = https://qrqdtzufqrucbhwvyutl.supabase.co;
+const SUPABASE_KEY = sb_publishable_9FzyiVtlKRKzTYOtXU2OLQ_jKv7a0ka;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ═══════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════
-let filteredVenues = [...venues];
+let venues = [];
+let filteredVenues = [];
 let selectedId = null;
 let categoryFilter = '';
 let markers = {};
 let isMobile = () => window.innerWidth <= 700;
 let currentMobileTab = 'map';
 
-// ═══════════════════════════════════════════════════
-// MAP INIT
-// ═══════════════════════════════════════════════════
 const map = L.map('map', {
   center: [4.63, -74.09],
   zoom: 11,
@@ -1110,9 +1087,6 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   maxZoom: 19
 }).addTo(map);
 
-// ═══════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════
 function getShowClass(show) {
   if (show === 'AMC') return 'amc';
   if (show === 'QOTSA') return 'qotsa';
@@ -1121,7 +1095,7 @@ function getShowClass(show) {
 }
 
 function getDiffLabel(d) {
-  return ['','Muy fácil','Fácil','Media','Difícil','Muy difícil'][d] || '';
+  return ['', 'Muy fácil', 'Fácil', 'Media', 'Difícil', 'Muy difícil'][d] || '';
 }
 
 function showChipsHtml(shows) {
@@ -1129,7 +1103,7 @@ function showChipsHtml(shows) {
 }
 
 function diffBlocksHtml(d) {
-  return Array.from({length:5},(_,i)=>
+  return Array.from({ length: 5 }, (_, i) =>
     `<div class="diff-block${i < d ? ' filled' : ''}"></div>`
   ).join('');
 }
@@ -1144,18 +1118,53 @@ function getMarkerColor(v) {
 function createMarkerIcon(v, active) {
   const color = getMarkerColor(v);
   const size = active ? 16 : 12;
-  const glow = active ? `box-shadow:0 0 0 3px rgba(255,255,255,0.2),0 0 12px ${color};` : `box-shadow:0 0 6px ${color};`;
+  const glow = active
+    ? `box-shadow:0 0 0 3px rgba(255,255,255,0.2),0 0 12px ${color};`
+    : `box-shadow:0 0 6px ${color};`;
+
   return L.divIcon({
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};${glow}border:2px solid rgba(255,255,255,${active?'.6':'.25'});transition:all .2s;"></div>`,
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};${glow}border:2px solid rgba(255,255,255,${active ? '.6' : '.25'});transition:all .2s;"></div>`,
     className: '',
     iconSize: [size, size],
-    iconAnchor: [size/2, size/2]
+    iconAnchor: [size / 2, size / 2]
   });
 }
 
-// ═══════════════════════════════════════════════════
-// DETAIL CONTENT
-// ═══════════════════════════════════════════════════
+async function loadVenuesFromSupabase() {
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*')
+    .order('id', { ascending: true });
+
+  if (error) {
+    console.error('Error cargando venues:', error);
+    alert('Error cargando venues desde Supabase. Revisa la consola.');
+    return;
+  }
+
+  venues = data.map(v => ({
+    id: v.id,
+    name: v.name,
+    city: v.city,
+    zone: v.zone || '',
+    address: v.address || '',
+    type: v.type || '',
+    lat: v.lat,
+    lng: v.lng,
+    recommendedShows: v.recommended_shows || [],
+    difficulty: v.difficulty,
+    affinity: v.affinity,
+    advantages: v.advantages || [],
+    disadvantages: v.disadvantages || [],
+    entryStrategy: v.entry_strategy || '',
+    bandBenefit: v.band_benefit || '',
+    strategicTags: v.strategic_tags || [],
+    notes: v.notes || ''
+  }));
+
+  filteredVenues = [...venues];
+}
+
 function getDetailBodyHtml(v) {
   return `
     <div class="detail-section">
@@ -1201,10 +1210,12 @@ function getDetailBodyHtml(v) {
   `;
 }
 
-// ═══════════════════════════════════════════════════
-// BUILD MARKERS
-// ═══════════════════════════════════════════════════
 function buildMarkers() {
+  Object.values(markers).forEach(marker => {
+    if (map.hasLayer(marker)) map.removeLayer(marker);
+  });
+  markers = {};
+
   venues.forEach(v => {
     const marker = L.marker([v.lat, v.lng], { icon: createMarkerIcon(v, false) });
 
@@ -1219,7 +1230,7 @@ function buildMarkers() {
       <div class="popup-row">
         <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)">Dificultad</span>
         <div class="popup-diff-blocks">
-          ${Array.from({length:5},(_,i)=>`<div class="popup-diff-block${i < v.difficulty ? ' filled' : ''}"></div>`).join('')}
+          ${Array.from({ length: 5 }, (_, i) => `<div class="popup-diff-block${i < v.difficulty ? ' filled' : ''}"></div>`).join('')}
         </div>
       </div>
       <div class="popup-row">
@@ -1245,21 +1256,20 @@ function buildMarkers() {
   });
 }
 
-// ═══════════════════════════════════════════════════
-// SELECT VENUE
-// ═══════════════════════════════════════════════════
 window.selectVenue = function(id) {
   const v = venues.find(x => x.id === id);
   if (!v) return;
   selectedId = id;
 
-  // Map
   map.flyTo([v.lat, v.lng], 14, { duration: 1 });
   Object.entries(markers).forEach(([mid, m]) => {
     const venue = venues.find(x => x.id == mid);
     if (venue) m.setIcon(createMarkerIcon(venue, mid == id));
   });
-  if (markers[id]) setTimeout(() => markers[id].openPopup(), 900);
+
+  if (markers[id]) {
+    setTimeout(() => markers[id].openPopup(), 900);
+  }
 
   highlightSidebarItem(id);
 
@@ -1274,13 +1284,11 @@ function highlightSidebarItem(id) {
   document.querySelectorAll('.venue-item').forEach(el => {
     el.classList.toggle('active', el.dataset.id == id);
   });
+
   const active = document.querySelector(`.venue-item[data-id="${id}"]`);
   if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ═══════════════════════════════════════════════════
-// DESKTOP DETAIL PANEL
-// ═══════════════════════════════════════════════════
 function openDetailPanel(v) {
   document.getElementById('detail-name').textContent = v.name;
   document.getElementById('detail-meta').textContent = `${v.city} · ${v.zone} · ${v.address}`;
@@ -1299,9 +1307,6 @@ document.getElementById('detail-close').addEventListener('click', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════
-// MOBILE DETAIL SHEET
-// ═══════════════════════════════════════════════════
 function openMobileDetail(v) {
   document.getElementById('mobile-detail-name').textContent = v.name;
   document.getElementById('mobile-detail-meta').textContent = `${v.city} · ${v.zone} · ${v.address}`;
@@ -1320,9 +1325,6 @@ document.getElementById('mobile-detail-close').addEventListener('click', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════
-// MOBILE TAB NAV
-// ═══════════════════════════════════════════════════
 window.showMobileTab = function(tab) {
   currentMobileTab = tab;
   const listPanel = document.getElementById('mobile-list-panel');
@@ -1337,17 +1339,12 @@ window.showMobileTab = function(tab) {
     listPanel.classList.remove('visible');
     mapBtn.classList.add('active');
     listBtn.classList.remove('active');
-    // Refresh map size when switching back
     setTimeout(() => map.invalidateSize(), 310);
   }
 };
 
-// Set initial mobile tab state
 document.getElementById('mob-btn-map').classList.add('active');
 
-// ═══════════════════════════════════════════════════
-// RENDER LIST (both desktop + mobile)
-// ═══════════════════════════════════════════════════
 function renderList() {
   const renderTo = (listId) => {
     const list = document.getElementById(listId);
@@ -1368,7 +1365,7 @@ function renderList() {
         `<div class="show-dot ${getShowClass(s)}"></div>`
       ).join('');
 
-      const diffBlocks = Array.from({length:5},(_,i)=>
+      const diffBlocks = Array.from({ length: 5 }, (_, i) =>
         `<div class="diff-mini-block${i < v.difficulty ? ' filled' : ''}"></div>`
       ).join('');
 
@@ -1386,12 +1383,12 @@ function renderList() {
       item.addEventListener('click', () => {
         if (isMobile()) {
           selectVenue(v.id);
-          // Switch to map tab on mobile to show the location
           showMobileTab('map');
         } else {
           selectVenue(v.id);
         }
       });
+
       list.appendChild(item);
     });
   };
@@ -1400,9 +1397,6 @@ function renderList() {
   renderTo('venue-list-mobile');
 }
 
-// ═══════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════
 function updateStats() {
   const amc = venues.filter(v => v.recommendedShows.includes('AMC')).length;
   const qotsa = venues.filter(v => v.recommendedShows.includes('QOTSA')).length;
@@ -1420,9 +1414,6 @@ function updateStats() {
   document.getElementById('stat-heavy').textContent = heavy;
 }
 
-// ═══════════════════════════════════════════════════
-// FILTER
-// ═══════════════════════════════════════════════════
 function getFilterValues() {
   if (isMobile()) {
     return {
@@ -1432,15 +1423,15 @@ function getFilterValues() {
       affinity: document.getElementById('filter-affinity-mobile').value,
       diff: document.getElementById('filter-diff-mobile').value,
     };
-  } else {
-    return {
-      search: document.getElementById('search-input').value.toLowerCase(),
-      show: document.getElementById('filter-show').value,
-      city: document.getElementById('filter-city').value,
-      affinity: document.getElementById('filter-affinity').value,
-      diff: document.getElementById('filter-diff').value,
-    };
   }
+
+  return {
+    search: document.getElementById('search-input').value.toLowerCase(),
+    show: document.getElementById('filter-show').value,
+    city: document.getElementById('filter-city').value,
+    affinity: document.getElementById('filter-affinity').value,
+    diff: document.getElementById('filter-diff').value,
+  };
 }
 
 function applyFilters() {
@@ -1451,7 +1442,7 @@ function applyFilters() {
     if (show && !v.recommendedShows.includes(show)) return false;
     if (city && v.city !== city) return false;
     if (affinity && v.affinity !== affinity) return false;
-    if (diff && v.difficulty !== parseInt(diff)) return false;
+    if (diff && v.difficulty !== parseInt(diff, 10)) return false;
     if (categoryFilter === 'accesible' && v.difficulty > 2) return false;
     if (categoryFilter === 'intermedio' && v.difficulty !== 3) return false;
     if (categoryFilter === 'pesado' && v.difficulty < 4) return false;
@@ -1464,7 +1455,6 @@ function applyFilters() {
   const mobileCount = document.getElementById('venue-count-mobile');
   if (mobileCount) mobileCount.innerHTML = countHtml;
 
-  // Show/hide markers
   Object.entries(markers).forEach(([id, m]) => {
     const inFilter = filteredVenues.find(v => v.id == id);
     if (inFilter) {
@@ -1477,9 +1467,6 @@ function applyFilters() {
   renderList();
 }
 
-// ═══════════════════════════════════════════════════
-// EVENTS — DESKTOP
-// ═══════════════════════════════════════════════════
 ['search-input','filter-show','filter-city','filter-affinity','filter-diff'].forEach(id => {
   const el = document.getElementById(id);
   if (el) {
@@ -1494,7 +1481,9 @@ document.getElementById('clear-filters').addEventListener('click', () => {
     if (el) el.value = '';
   });
   categoryFilter = '';
-  document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === ''));
+  document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === '');
+  });
   applyFilters();
 });
 
@@ -1507,9 +1496,6 @@ document.querySelectorAll('#cat-tabs-desktop .cat-tab').forEach(tab => {
   });
 });
 
-// ═══════════════════════════════════════════════════
-// EVENTS — MOBILE
-// ═══════════════════════════════════════════════════
 ['search-input-mobile','filter-show-mobile','filter-city-mobile','filter-affinity-mobile','filter-diff-mobile'].forEach(id => {
   const el = document.getElementById(id);
   if (el) {
@@ -1524,7 +1510,9 @@ document.getElementById('clear-filters-mobile').addEventListener('click', () => 
     if (el) el.value = '';
   });
   categoryFilter = '';
-  document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === ''));
+  document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === '');
+  });
   applyFilters();
 });
 
@@ -1537,12 +1525,13 @@ document.querySelectorAll('#cat-tabs-mobile .cat-tab').forEach(tab => {
   });
 });
 
-// ═══════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════
-buildMarkers();
-updateStats();
-applyFilters();
+(async function initApp() {
+  await loadVenuesFromSupabase();
+  buildMarkers();
+  updateStats();
+  applyFilters();
+  setTimeout(() => map.invalidateSize(), 350);
+})();
 </script>
 </body>
 </html>
